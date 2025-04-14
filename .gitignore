@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+logs/
+
 # C extensions
 *.so
 
@@ -139,5 +141,7 @@ ABCModel/
 *.bin
 cleaned_data/
 predict_abc/
+test_outputs/
 *.zip
+*.pkl
 train_corpus

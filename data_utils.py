@@ -1,7 +1,8 @@
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-USEABLE_KEYS = [i+":" for i in "BCDFGHIKLMmNOPQRrSsTUVWwXZ"]
+USEABLE_KEYS = [i+":" for i in "KLMmNQRs"]
+USELESS_KEYS = [i+":" for i in "ABCDFGHIOPrSTUVWXZ"]
 
 
 def read_abc(path):
@@ -11,6 +12,9 @@ def read_abc(path):
         for line in rf:
             line = line.strip()
             if line.startswith("%"):
+                continue
+
+            if any([line.startswith(key) for key in USELESS_KEYS]):
                 continue
 
             if any([line.startswith(key) for key in USEABLE_KEYS]):
@@ -40,8 +44,8 @@ def read_abc(path):
 
 
 def collate_function(batch):
-    features = [i["features"] for i in batch]
-    target = [i["target"] for i in batch]
+    features = [i[0] for i in batch]
+    target = [i[1] for i in batch]
     
     features_lens = [len(i) for i in features]
     target_lens = [len(i) for i in target]
@@ -59,7 +63,7 @@ def collate_function(batch):
     target_padded = pad_sequence(target, batch_first=True)
     
     return {"input_ids": features_padded,
-            "decoder_input_ids": target_padded,
+            # "decoder_input_ids": target_padded,
             "labels": target_padded, 
             "attention_mask": features_mask, 
             "decoder_attention_mask": target_mask}

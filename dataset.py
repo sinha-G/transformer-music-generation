@@ -30,34 +30,32 @@ class ABCDataset(Dataset):
     def __len__(self):
         return len(self.keys)
     
-    
     def __getitem__(self, idx):
         notes = self.notes[idx]
         keys = self.keys[idx]
         
         if not self.is_test:
             split_indx = 8
-
-            # split notes to context (input for network) and target (that model must to generate)
             context_notes = notes[split_indx - self.context_bars_num : split_indx]
             target_notes = notes[split_indx: split_indx + self.target_bars_num]
         else:
             context_notes = notes
             target_notes = []
 
-        context_tokens = [self.bos_id] + keys
-        target_tokens = [self.bos_id]
+        # Flatten context_notes and target_notes
+        context_notes = [item for sublist in context_notes for item in sublist]
+        target_notes = [item for sublist in target_notes for item in sublist]
 
-        for bar in context_notes:
-            context_tokens += bar
+        # Prepare input tokens
+        input_tokens = [self.bos_id] + keys + context_notes + [self.eos_id]
 
-        for bar in target_notes:
-            target_tokens += bar
+        # Prepare label tokens
+        label_tokens = target_notes + [self.eos_id]
+        
+        input_ids = torch.tensor(input_tokens, dtype=torch.long)
+        labels = torch.tensor(label_tokens, dtype=torch.long)
 
-        context_tokens += [self.eos_id]
-        target_tokens += [self.eos_id]
+        # print("Raw input tokens:", input_tokens)
+        # print("Raw label tokens:", label_tokens)
 
-        context_tokens = torch.tensor(context_tokens, dtype=torch.long)
-        target_tokens = torch.tensor(target_tokens, dtype=torch.long)
-
-        return {"features": context_tokens, "target": target_tokens}
+        return input_ids, labels
