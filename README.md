@@ -25,7 +25,7 @@ Last, we train the model.
 python3 train.py cleaned_data
 ```
 
-## Generation 
+## Inference 
 ```
 python3 generate.py testset/abc ABCModel/checkpoint-3/pytorch_model.bin
 ``` 
