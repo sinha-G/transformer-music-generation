@@ -1,4 +1,3 @@
-from transformers import T5Config, T5ForConditionalGeneration
 from transformers import BertConfig, EncoderDecoderConfig, EncoderDecoderModel
 
 def get_model(vocab_size=25000):
