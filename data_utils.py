@@ -44,26 +44,49 @@ def read_abc(path):
 
 
 def collate_function(batch):
-    features = [i[0] for i in batch]
-    target = [i[1] for i in batch]
+    input_ids_list = [item[0] for item in batch] # item[0] is input_ids
+    labels_list = [item[1] for item in batch]   # item[1] is labels
     
-    features_lens = [len(i) for i in features]
-    target_lens = [len(i) for i in target]
+    # Pad the input sequences (encoder inputs)
+    padded_input_ids = pad_sequence(
+        input_ids_list, 
+        batch_first=True, 
+        padding_value=0
+    )
     
-    max_features_len = max(features_lens)
-    max_target_len = max(target_lens)
+    # Create attention mask for the encoder inputs
+    attention_mask = (padded_input_ids != 0).long()
     
-    features_mask = torch.tensor([[1] * l + [0] * (max_features_len - l) for l in features_lens],
-                                 dtype=torch.bool)
-    
-    target_mask = torch.tensor([[1] * l + [0] * (max_target_len - l) for l in target_lens],
-                                dtype=torch.bool)
-    
-    features_padded = pad_sequence(features, batch_first=True)
-    target_padded = pad_sequence(target, batch_first=True)
-    
-    return {"input_ids": features_padded,
-            # "decoder_input_ids": target_padded,
-            "labels": target_padded, 
-            "attention_mask": features_mask, 
-            "decoder_attention_mask": target_mask}
+    # Pad the label sequences (decoder targets)
+    # Pad with PAD_TOKEN_ID first
+    padded_labels_temp = pad_sequence(
+        labels_list, 
+        batch_first=True, 
+        padding_value=0 
+    )
+    # Clone and replace padding with IGNORE_INDEX so loss is not computed on padding
+    padded_labels = padded_labels_temp.clone()
+    padded_labels[padded_labels_temp == 0] = -100
+
+    # Create decoder_input_ids by shifting the labels right and adding BOS_ID
+    # Ensure decoder_input_ids are kept on the same device (CPU initially)
+    # decoder_input_ids = torch.full_like(padded_labels_temp, 0)
+    # Set the first token of each sequence to BOS_ID
+    # decoder_input_ids[:, 0] = 2
+    # Shift the padded labels (without ignore_index) to the right
+    # Copy tokens from padded_labels_temp starting from index 0 up to the second to last token
+    # into decoder_input_ids starting from index 1
+    # decoder_input_ids[:, 1:] = padded_labels_temp[:, :-1]
+    # Any PAD_ID from padded_labels_temp will be correctly shifted
+
+    # Create attention mask for the decoder inputs
+    # decoder_attention_mask = (decoder_input_ids != 0).long()
+
+    # Return the dictionary including decoder_input_ids and decoder_attention_mask
+    return {
+        "input_ids": padded_input_ids,
+        "attention_mask": attention_mask,
+        "labels": padded_labels,
+        # "decoder_input_ids": decoder_input_ids,
+        # "decoder_attention_mask": decoder_attention_mask # Add decoder attention mask
+    }
