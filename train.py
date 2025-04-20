@@ -18,7 +18,7 @@ CONTEXT_BARS = 8 # Number of bars for context
 TARGET_BARS = 8 # Number of bars for target
 IGNORE_IDS = [BOS_ID, EOS_ID, PAD_ID] # IDs to ignore during decoding for display
 MIN_TOKENS = 64 # Minimum number of tokens for a valid sequence
-MAX_TOKENS = 1000 # Maximum number of tokens for a valid sequence
+MAX_TOKENS = 500 # Maximum number of tokens for a valid sequence
 
 class TestingCallback(TrainerCallback):
     def __init__(self, model, tokenizer, test_data, every_n_steps=100):

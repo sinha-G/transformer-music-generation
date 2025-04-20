@@ -67,26 +67,9 @@ def collate_function(batch):
     # Clone and replace padding with IGNORE_INDEX so loss is not computed on padding
     padded_labels = padded_labels_temp.clone()
     padded_labels[padded_labels_temp == 0] = -100
-
-    # Create decoder_input_ids by shifting the labels right and adding BOS_ID
-    # Ensure decoder_input_ids are kept on the same device (CPU initially)
-    # decoder_input_ids = torch.full_like(padded_labels_temp, 0)
-    # Set the first token of each sequence to BOS_ID
-    # decoder_input_ids[:, 0] = 2
-    # Shift the padded labels (without ignore_index) to the right
-    # Copy tokens from padded_labels_temp starting from index 0 up to the second to last token
-    # into decoder_input_ids starting from index 1
-    # decoder_input_ids[:, 1:] = padded_labels_temp[:, :-1]
-    # Any PAD_ID from padded_labels_temp will be correctly shifted
-
-    # Create attention mask for the decoder inputs
-    # decoder_attention_mask = (decoder_input_ids != 0).long()
-
-    # Return the dictionary including decoder_input_ids and decoder_attention_mask
+    
     return {
         "input_ids": padded_input_ids,
         "attention_mask": attention_mask,
-        "labels": padded_labels,
-        # "decoder_input_ids": decoder_input_ids,
-        # "decoder_attention_mask": decoder_attention_mask # Add decoder attention mask
+        "labels": padded_labels
     }
