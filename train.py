@@ -118,7 +118,7 @@ def main():
     training_args = TrainingArguments(
         output_dir="./ABCModel",
         overwrite_output_dir=True,
-        num_train_epochs=1,
+        num_train_epochs=20,
         per_device_train_batch_size=10,
         save_strategy="steps",
         save_steps=5000,
@@ -127,7 +127,7 @@ def main():
         gradient_checkpointing=True,
         dataloader_num_workers=0,
         # label_smoothing_factor=0.1,
-        learning_rate=1e-6,
+        learning_rate=1e-5,
         bf16=True,
         save_safetensors=False,
         dataloader_pin_memory=True,
